@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardify – Goals & Mission</title>
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="Guardify_Logo.png" alt="Guardify Logo">
+    <span>Guard<em>ify</em></span>
+  </a>
+    <ul>
+    <li><a href="index.html" >Home</a></li>
+    <li><a href="idea.html" >The Idea</a></li>
+    <li><a href="goals.html" class="active">Goals &amp; Mission</a></li>
+    <li><a href="team.html" >Team</a></li>
+    <li><a href="analyzer.html" >Analyzer</a></li>
+    <li><a href="packages.html" >Packages</a></li>
+    <li><a href="contact.html" >Contact</a></li>
+  </ul>
+  <a href="analyzer.html" class="nav-cta">Try It Free</a>
+  <button class="hamburger" id="hamburger" aria-label="Open Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="idea.html">The Idea</a>
+    <a href="goals.html" class="active">Goals &amp; Mission</a>
+    <a href="team.html">Team</a>
+    <a href="analyzer.html">Analyzer</a>
+    <a href="packages.html">Packages</a>
+    <a href="contact.html">Contact</a>
+</div>
+
+<section class="page-hero">
+  <div class="hero-grid" style="opacity:.5"></div>
+  <div class="section-label" style="justify-content:center">What drives us</div>
+  <h1>Our Goals <span class="accent">&amp; Mission</span></h1>
+  <p>We want to make the web safer, more accessible, and more transparent – for everyone, not just experts.</p>
+</section>
+<div class="goals-layout">
+  <div class="mission-box reveal">
+    <h3>// Our Mission</h3>
+    <p>Our mission is to create a user-friendly interface that guarantees privacy and security. We aim to improve the design and code of websites—while making valuable, easy-to-understand suggestions accessible to everyone.</p>
+  </div>
+  <div class="goals-grid">
+    <div class="goal-item reveal"><div class="goal-num">01</div><div><h4>User-friendly interface</h4><p>An intuitive app that can be used even without any technical background.</p></div></div>
+    <div class="goal-item reveal"><div class="goal-num">02</div><div><h4>Guarantee privacy</h4><p>Security is our mission—not only for the websites we analyze, but also for our users.</p></div></div>
+    <div class="goal-item reveal"><div class="goal-num">03</div><div><h4>Code &amp; Improve your appearance</h4><p>We analyze both the visual design and the underlying code.</p></div></div>
+    <div class="goal-item reveal"><div class="goal-num">04</div><div><h4>Reaching a young audience</h4><p>Young entrepreneurs and website owners in particular stand to benefit from Guardify.</p></div></div>
+    <div class="goal-item reveal"><div class="goal-num">05</div><div><h4>Valuable suggestions</h4><p>Specific, actionable recommendations based on a thorough analysis.</p></div></div>
+    <div class="goal-item reveal"><div class="goal-num">06</div><div><h4>Mobile App Extension</h4><p>Following the web version, we plan to release a full-featured mobile app.</p></div></div>
+  </div>
+</div>
+<div class="roadmap">
+  <div class="section-label">Development Plan</div>
+  <h2>Our <span class="accent">Roadmap</span></h2>
+  <div class="timeline">
+    <div class="t-item reveal"><div class="t-phase">// Phase 01</div><h4>Concept &amp; Website</h4><p>Development of the presentation website, including the concept, goals, and vision.</p><span class="t-status active">In progress</span></div>
+    <div class="t-item reveal"><div class="t-phase">// Phase 02</div><h4>Backend Development with Flask</h4><p>Development of the Python backend using Flask and a REST API connection to the frontend.</p><span class="t-status planned">Planned</span></div>
+    <div class="t-item reveal"><div class="t-phase">// Phase 03</div><h4>Analysis Modules</h4><p>SSL Check, Performance Measurement, Mobile Testing, Code Quality.</p><span class="t-status planned">Planned</span></div>
+    <div class="t-item reveal"><div class="t-phase">// Phase 04</div><h4>Mobile App</h4><p>Expansion into a full-featured mobile app for iOS and Android.</p><span class="t-status planned">Future</span></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">
+    <img src="Guardify_Logo.png" alt="Guardify Logo">
+    <span>Guard<em>ify</em></span>
+  </div>
+  <div class="footer-copy">© 2025 Guardify – All rights reserved</div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="idea.html">The Idea</a>
+    <a href="goals.html">Goals</a>
+    <a href="team.html">Team</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx=0, my=0, rx=0, ry=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+    function animRing(){ rx+=(mx-rx)*.15; ry+=(my-ry)*.15; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); }
+    animRing();
+    const obs = new IntersectionObserver(entries => entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'), i*80); }), {threshold:.1});
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
+  </script>
+</body>
+</html>

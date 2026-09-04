@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardify – Website Analyzer</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+  /* ── PAGE HERO ── */
+  .analyzer-hero {
+    min-height: 48vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 9rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .analyzer-hero h1 { font-family:'Outfit',sans-serif; font-size:clamp(2.2rem,5vw,4rem); font-weight:900; line-height:1.08; letter-spacing:-.04em; animation:fadeUp .8s ease both; }
+  .analyzer-hero p { color:var(--muted); margin-top:1rem; font-size:1.05rem; max-width:480px; animation:fadeUp .8s .1s ease both; }
+
+  /* ── SEARCH BOX ── */
+  .search-section { padding: 0 2rem 4rem; display:flex; flex-direction:column; align-items:center; }
+  .search-outer {
+    position: relative;
+    max-width: 680px;
+    width: 100%;
+    animation: fadeUp .8s .2s ease both;
+  }
+  .search-glow {
+    position: absolute; inset: -2px;
+    background: linear-gradient(135deg, var(--c4), var(--c1));
+    border-radius: 16px; opacity: .18;
+    filter: blur(14px); pointer-events: none;
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse { 0%,100%{opacity:.15} 50%{opacity:.28} }
+  .search-box {
+    position: relative; z-index: 1;
+    display: flex; align-items: center;
+    background: var(--surface);
+    border: 1px solid rgba(67,195,228,.2);
+    border-radius: 14px; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .search-box:focus-within { border-color: rgba(67,195,228,.45); }
+  .search-icon { padding: 0 12px 0 20px; color:var(--muted); font-size:1.1rem; flex-shrink:0; }
+  #urlInput {
+    flex: 1; background: transparent; border: none;
+    padding: 1.1rem 0; color: var(--text);
+    font-size: .95rem; font-family: 'JetBrains Mono', monospace;
+    outline: none; min-width: 0;
+  }
+  #urlInput::placeholder { color: rgba(122,154,181,.5); }
+  .scan-btn {
+    background: linear-gradient(135deg, var(--c4), var(--c3));
+    border: none; color: #fff;
+    padding: .85rem 2rem; margin: .5rem;
+    border-radius: 10px; font-size: .9rem;
+    font-weight: 700; font-family: 'Outfit',sans-serif;
+    cursor: pointer; white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(67,195,228,.25);
+    transition: all .2s; flex-shrink: 0;
+  }
+  .scan-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(67,195,228,.4); }
+  .scan-btn:active { transform: translateY(0); }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    display: none; max-width:680px; width:100%;
+    margin-top: 1.2rem; animation: fadeUp .5s ease both;
+  }
+  .p-steps { display:flex; gap:5px; margin-bottom:.8rem; }
+  .p-step { flex:1; height:3px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+  .p-fill { height:100%; background:linear-gradient(90deg,var(--c4),var(--c1)); border-radius:2px; width:0; transition:width .45s ease; }
+  .p-label { font-size:.78rem; color:var(--c1); font-family:'JetBrains Mono',monospace; text-align:center; min-height:1.2rem; }
+
+  /* ── RESULTS ── */
+  #results {
+    display: none;
+    padding: 0 5rem 6rem;
+    animation: fadeUp .6s ease both;
+  }
+
+  /* Report header */
+  .report-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .rh-site { display:flex; align-items:center; gap:1.2rem; }
+  .rh-favicon {
+    width:48px; height:48px; border-radius:12px;
+    background: linear-gradient(135deg,var(--c4),var(--c3));
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; font-weight:900; color:#fff;
+    font-family:'Outfit',sans-serif; flex-shrink:0;
+  }
+  .rh-url { font-family:'JetBrains Mono',monospace; font-size:1rem; color:var(--text); font-weight:500; }
+  .rh-meta { font-size:.78rem; color:var(--muted); margin-top:.3rem; display:flex; gap:.8rem; flex-wrap:wrap; align-items:center; }
+  .rh-online { color:#34d399; font-weight:600; display:flex; align-items:center; gap:.4rem; }
+  .rh-online::before { content:''; width:6px; height:6px; border-radius:50%; background:#34d399; animation:blink 2s ease infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .overall { text-align:right; }
+  .overall-num {
+    font-size:3.5rem; font-weight:900; font-family:'Outfit',sans-serif;
+    line-height:1; color:var(--c1);
+    text-shadow: 0 0 30px rgba(67,195,228,.4);
+  }
+  .overall-label { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:.3rem; font-family:'JetBrains Mono',monospace; }
+  .overall-grade { font-size:.82rem; color:#fbbf24; margin-top:.3rem; font-weight:600; }
+
+  /* Score cards */
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .sc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    padding-bottom: 1.5rem;
+    text-align: center;
+    transition: transform .2s, border-color .2s;
+  }
+  .sc:hover { transform: translateY(-4px); border-color: rgba(67,195,228,.3); }
+  .sc-top { height:4px; }
+  .sc-ring { position:relative; display:inline-flex; align-items:center; justify-content:center; margin:1.5rem 0 .8rem; }
+  .sc-ring svg { transform:rotate(-90deg); }
+  .sc-ring-val { position:absolute; font-size:1.2rem; font-weight:800; font-family:'Outfit',sans-serif; }
+  .sc-name { font-weight:700; font-size:.9rem; }
+  .sc-sub { font-size:.75rem; color:var(--muted); margin-top:.3rem; font-family:'JetBrains Mono',monospace; }
+  .c-green{color:#34d399} .c-amber{color:#fbbf24} .c-red{color:#f87171} .c-blue{color:var(--c1)}
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: .5rem; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .8rem;
+  }
+  .tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted); padding: .55rem 1.2rem;
+    border-radius: 8px; font-size: .82rem;
+    font-family: 'Outfit',sans-serif;
+    cursor: pointer; transition: all .2s; font-weight:500;
+  }
+  .tab:hover { color:var(--text); border-color:rgba(67,195,228,.3); }
+  .tab.active { background:rgba(67,195,228,.08); border-color:rgba(67,195,228,.4); color:var(--c1); }
+
+  /* Tab sections */
+  .sec { display:none; }
+  .sec.active { display:block; animation: fadeUp .4s ease both; }
+  .sec-label { font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:1.2rem; }
+
+  /* Issues list */
+  .issues-list { display:flex; flex-direction:column; gap:.9rem; }
+  .issue {
+    display: flex; gap:1.2rem; align-items:flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding:1.4rem;
+    transition: border-color .2s;
+  }
+  .issue:hover { border-color: rgba(67,195,228,.25); }
+  .issue-sev-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+  .issue-title { font-weight:700; font-size:.95rem; margin-bottom:.4rem; }
+  .issue-desc { font-size:.82rem; color:var(--muted); line-height:1.6; }
+  .issue-fix { font-size:.8rem; color:var(--c1); margin-top:.6rem; font-family:'JetBrains Mono',monospace; }
+  .badge { margin-left:auto; flex-shrink:0; font-size:.65rem; font-weight:700; letter-spacing:.08em; padding:.3rem .8rem; border-radius:6px; text-transform:uppercase; font-family:'JetBrains Mono',monospace; align-self:flex-start; }
+  .badge-crit { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.3); }
+  .badge-warn { background:rgba(251,191,36,.1); color:#fbbf24; border:1px solid rgba(251,191,36,.25); }
+  .badge-info { background:rgba(67,195,228,.08); color:var(--c1); border:1px solid rgba(67,195,228,.2); }
+
+  /* Two-col panels */
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.8rem; }
+  .panel-title { font-weight:700; font-size:.9rem; margin-bottom:1.2rem; padding-bottom:.8rem; border-bottom:1px solid var(--border); color:var(--text); }
+  .mrow { display:flex; align-items:center; justify-content:space-between; padding:.5rem 0; border-bottom:1px solid rgba(67,195,228,.06); font-size:.83rem; }
+  .mrow:last-child { border-bottom:none; }
+  .mkey { color:var(--muted); }
+  .mval { font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:500; }
+  .mbar-wrap { flex:1; height:4px; background:var(--surface2); border-radius:2px; margin:0 1rem; overflow:hidden; }
+  .mbar { height:100%; border-radius:2px; }
+
+  /* Checklist */
+  .citem { display:flex; align-items:center; gap:.9rem; padding:.55rem 0; font-size:.83rem; border-bottom:1px solid rgba(67,195,228,.06); }
+  .citem:last-child { border-bottom:none; }
+  .cico { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:800; flex-shrink:0; }
+  .ico-ok { background:rgba(52,211,153,.12); color:#34d399; }
+  .ico-err { background:rgba(248,113,113,.12); color:#f87171; }
+  .ico-warn { background:rgba(251,191,36,.1); color:#fbbf24; }
+
+  /* SEO cards */
+  .seo-top { display:grid; grid-template-columns:repeat(6,1fr); gap:.8rem; margin-bottom:1.2rem; }
+  .seo-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.2rem .8rem; text-align:center; }
+  .seo-val { font-size:1.6rem; font-weight:900; font-family:'Outfit',sans-serif; }
+  .seo-key { font-size:.68rem; color:var(--muted); margin-top:.3rem; text-transform:uppercase; letter-spacing:.06em; font-family:'JetBrains Mono',monospace; }
+
+  /* Packages */
+  .pkg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-top:1rem; }
+  .pkg {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem;
+    position: relative; transition: transform .2s, border-color .2s;
+  }
+  .pkg:hover { transform:translateY(-4px); border-color:rgba(67,195,228,.3); }
+  .pkg.popular { border-color:rgba(67,195,228,.4); background:rgba(67,195,228,.04); }
+  .pop-badge { font-size:.65rem; color:var(--c1); text-transform:uppercase; letter-spacing:.1em; font-weight:700; margin-bottom:1rem; font-family:'JetBrains Mono',monospace; }
+  .pkg-name { font-size:1.3rem; font-weight:800; font-family:'Outfit',sans-serif; margin-bottom:.5rem; }
+  .pkg-price { font-size:2rem; font-weight:900; font-family:'Outfit',sans-serif; color:var(--c1); margin-bottom:.4rem; }
+  .pkg-price span { font-size:.85rem; color:var(--muted); font-weight:400; }
+  .pkg-target { font-size:.78rem; color:var(--muted); margin-bottom:1.2rem; padding-bottom:1rem; border-bottom:1px solid var(--border); line-height:1.5; }
+  .pkg-feat { font-size:.82rem; color:var(--muted); padding:.35rem 0; display:flex; gap:.6rem; align-items:center; }
+  .pkg-feat .ok { color:#34d399; font-weight:700; }
+  .pkg-feat .no { color:rgba(122,154,181,.4); }
+  .pkg-btn {
+    width:100%; margin-top:1.5rem; padding:1rem;
+    background:linear-gradient(135deg,var(--c4),var(--c3));
+    border:none; border-radius:10px; color:#fff;
+    font-size:.9rem; font-weight:700; font-family:'Outfit',sans-serif;
+    cursor:pointer; transition:all .2s;
+    box-shadow: 0 4px 16px rgba(67,195,228,.2);
+  }
+  .pkg-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(67,195,228,.35); }
+
+  /* Report footer */
+  .report-foot {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:1.5rem 2rem; margin-top:2rem;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;
+  }
+  .report-foot p { font-size:.78rem; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+  .foot-btns { display:flex; gap:.6rem; flex-wrap:wrap; }
+  .fb {
+    padding:.65rem 1.2rem; border-radius:8px; font-size:.8rem;
+    font-family:'Outfit',sans-serif; font-weight:600; cursor:pointer; transition:all .2s; border:none;
+  }
+  .fb-primary { background:linear-gradient(135deg,var(--c4),var(--c3)); color:#fff; }
+  .fb-sec { background:transparent; border:1px solid var(--border); color:var(--muted); }
+  .fb-sec:hover { color:var(--text); border-color:rgba(67,195,228,.3); }
+
+  /* Features strip */
+  .how-section {
+    padding: 6rem 5rem;
+    border-top: 1px solid var(--border);
+  }
+  .steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-top:3rem; }
+  .step-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:2rem;
+    transition: transform .2s, border-color .2s;
+  }
+  .step-card:hover { transform:translateY(-4px); border-color:rgba(67,195,228,.3); }
+  .step-num {
+    width:48px; height:48px; border-radius:12px;
+    background:linear-gradient(135deg,var(--c4),var(--c3));
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; font-weight:900; font-family:'Outfit',sans-serif;
+    margin-bottom:1.2rem;
+    box-shadow: 0 4px 16px rgba(67,195,228,.3);
+  }
+  .step-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:.6rem; }
+  .step-card p { font-size:.85rem; color:var(--muted); line-height:1.7; }
+
+  /* ── FREE TRIAL BADGE ── */
+  .trial-badge {
+    display: inline-flex; align-items: center; gap: .7rem;
+    background: rgba(67,195,228,.06);
+    border: 1px solid rgba(67,195,228,.2);
+    border-radius: 100px; padding: .5rem 1.2rem;
+    font-size: .78rem; font-family: 'JetBrains Mono', monospace;
+    color: var(--muted); margin-top: 1.4rem;
+    animation: fadeUp .8s .3s ease both;
+  }
+  .trial-dots { display:flex; gap:5px; align-items:center; }
+  .trial-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--c4), var(--c1));
+    transition: background .4s, border .4s;
+  }
+  .trial-dot.used {
+    background: rgba(122,154,181,.15);
+    border: 1px solid rgba(122,154,181,.25);
+  }
+  .trial-text { color: var(--c1); font-weight: 600; }
+  .trial-badge.exhausted { border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.06); }
+  .trial-badge.exhausted .trial-text { color: #f87171; }
+
+  /* ── PAYWALL OVERLAY ── */
+  .paywall-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(5,13,24,.92);
+    backdrop-filter: blur(18px);
+    align-items: center; justify-content: center;
+  }
+  .paywall-overlay.show { display: flex; animation: fadeUp .4s ease both; }
+  .paywall-card {
+    background: var(--surface);
+    border: 1px solid rgba(67,195,228,.25);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    max-width: 900px; width: 90%;
+    max-height: 90vh; overflow-y: auto;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 60px rgba(67,195,228,.08);
+  }
+  .paywall-close {
+    position: absolute; top: 1.2rem; right: 1.5rem;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); width: 36px; height: 36px;
+    border-radius: 8px; font-size: 1.1rem; cursor: pointer;
+    transition: all .2s; display:flex; align-items:center; justify-content:center;
+  }
+  .paywall-close:hover { color:var(--text); border-color:rgba(67,195,228,.4); }
+  .paywall-icon { font-size: 3rem; text-align:center; margin-bottom: 1rem; }
+  .paywall-title {
+    font-family: 'Outfit',sans-serif; font-size: clamp(1.6rem,3vw,2.4rem);
+    font-weight: 900; text-align: center; letter-spacing: -.03em; margin-bottom: .5rem;
+  }
+  .paywall-sub { text-align:center; color:var(--muted); font-size:.9rem; margin-bottom: 2.5rem; line-height:1.7; }
+  .paywall-pkg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  .paywall-contact { text-align:center; margin-top:1.5rem; font-size:.82rem; color:var(--muted); }
+  .paywall-contact a { color:var(--c1); text-decoration:none; }
+  .paywall-contact a:hover { text-decoration:underline; }
+  @media(max-width:680px){ .paywall-pkg-grid { grid-template-columns:1fr; } }
+
+  /* Responsive */
+  @media(max-width:900px){
+    #results { padding:0 1.5rem 4rem; }
+    .score-grid { grid-template-columns:1fr 1fr; }
+    .two-col { grid-template-columns:1fr; }
+    .seo-top { grid-template-columns:repeat(3,1fr); }
+    .pkg-grid { grid-template-columns:1fr; }
+    .report-header { flex-direction:column; align-items:flex-start; }
+    .overall { text-align:left; }
+    .steps-grid { grid-template-columns:1fr; }
+    .how-section { padding:4rem 1.5rem; }
+  }
+  @media(max-width:600px){
+    .score-grid { grid-template-columns:1fr 1fr; }
+    .seo-top { grid-template-columns:repeat(2,1fr); }
+    .analyzer-hero { padding:8rem 1.5rem 3rem; }
+    .search-section { padding:0 1.5rem 3rem; }
+  }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="Guardify_Logo.png" alt="Guardify Logo">
+      <span>Guard<em>ify</em></span>
+    </a>
+        <ul>
+      <li><a href="index.html" >Home</a></li>
+      <li><a href="idea.html" >The Idea</a></li>
+      <li><a href="goals.html" >Goals &amp; Mission</a></li>
+      <li><a href="team.html" >Team</a></li>
+      <li><a href="analyzer.html" class="active">Analyzer</a></li>
+      <li><a href="packages.html" >Packages</a></li>
+      <li><a href="contact.html" >Contact</a></li>
+    </ul>
+    <a href="analyzer.html" class="nav-cta">Try It Free</a>
+    <button class="hamburger" id="hamburger" aria-label="Open Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="idea.html">The Idea</a>
+    <a href="goals.html">Goals &amp; Mission</a>
+    <a href="team.html">Team</a>
+    <a href="analyzer.html" class="active">Analyzer</a>
+    <a href="packages.html">Packages</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="analyzer-hero">
+    <div class="hero-grid"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="section-label" style="justify-content:center; animation:fadeUp .7s ease both;">Website Security &amp; Analysis Tool</div>
+    <h1>Analyze Your <span class="accent">Website</span><br>In Seconds</h1>
+    <p>Enter any URL and get a full report on performance, security, mobile readiness, code quality, and SEO.</p>
+    <div class="trial-badge" id="trialBadge">
+      <div class="trial-dots">
+        <div class="trial-dot" id="td1"></div>
+        <div class="trial-dot" id="td2"></div>
+        <div class="trial-dot" id="td3"></div>
+      </div>
+      <span class="trial-text" id="trialText">3 free analyses remaining</span>
+    </div>
+  </section>
+
+  <!-- PAYWALL OVERLAY -->
+  <div class="paywall-overlay" id="paywallOverlay">
+    <div class="paywall-card">
+      <button class="paywall-close" onclick="closePaywall()">✕</button>
+      <div class="paywall-icon">🔒</div>
+      <div class="paywall-title">Free Analyses <span class="accent">Used Up</span></div>
+      <p class="paywall-sub">You've used all 3 free analyses. Choose a package below to keep analyzing your websites — with full reports, PDF downloads, and more.</p>
+      <div class="paywall-pkg-grid">
+        <div class="pkg">
+          <div class="pkg-name">Basic</div>
+          <div class="pkg-price">5–10 <span>€ / analysis</span></div>
+          <div class="pkg-target">For individuals and beginners</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Quick website analysis</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Speed test</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Basic error detection</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Quick improvement tips</div>
+          <div class="pkg-feat"><span class="no">–</span>PDF Report</div>
+          <div class="pkg-feat"><span class="no">–</span>Full security check</div>
+          <button class="pkg-btn" onclick="window.location.href='contact.html'">Get Basic →</button>
+        </div>
+        <div class="pkg popular">
+          <div class="pop-badge">✦ MOST POPULAR</div>
+          <div class="pkg-name">Standard</div>
+          <div class="pkg-price">10–20 <span>€ / analysis</span></div>
+          <div class="pkg-target">For small businesses &amp; freelancers</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Full analysis</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Complete security check</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Mobile optimization</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Code check + SEO</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Full PDF report</div>
+          <div class="pkg-feat"><span class="no">–</span>Email consultation</div>
+          <button class="pkg-btn" onclick="window.location.href='contact.html'">Get Standard →</button>
+        </div>
+        <div class="pkg">
+          <div class="pkg-name">Premium</div>
+          <div class="pkg-price">25–50 <span>€ / analysis</span></div>
+          <div class="pkg-target">For businesses with higher needs</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Everything from Standard</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Detailed code optimization</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Advanced security tips</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Email consultation</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Before/after comparison</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Monthly monitoring</div>
+          <button class="pkg-btn" onclick="window.location.href='contact.html'">Get Premium →</button>
+        </div>
+      </div>
+      <p class="paywall-contact">Have questions? <a href="contact.html">Contact us</a> or email us at <a href="mailto:guardifyapp2025@gmail.com">guardifyapp2025@gmail.com</a></p>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-section">
+    <div class="search-outer">
+      <div class="search-glow"></div>
+      <div class="search-box">
+        <div class="search-icon">🔍</div>
+        <input type="text" id="urlInput" placeholder="https://yourwebsite.com" autocomplete="off" spellcheck="false">
+        <button class="scan-btn" onclick="startAnalysis()">Analyze →</button>
+      </div>
+    </div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="p-steps">
+        <div class="p-step"><div class="p-fill" id="pf1"></div></div>
+        <div class="p-step"><div class="p-fill" id="pf2"></div></div>
+        <div class="p-step"><div class="p-fill" id="pf3"></div></div>
+        <div class="p-step"><div class="p-fill" id="pf4"></div></div>
+        <div class="p-step"><div class="p-fill" id="pf5"></div></div>
+        <div class="p-step"><div class="p-fill" id="pf6"></div></div>
+      </div>
+      <div class="p-label" id="pLabel">Initializing scan...</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <!-- Header -->
+    <div class="report-header">
+      <div class="rh-site">
+        <div class="rh-favicon" id="rFavicon">G</div>
+        <div>
+          <div class="rh-url" id="rUrl">https://example.com</div>
+          <div class="rh-meta">
+            <span class="rh-online">Online</span>
+            <span id="rDate">Analysis complete</span>
+            <span>— 8.2 seconds</span>
+          </div>
+        </div>
+      </div>
+      <div class="overall">
+        <div class="overall-num" id="rScore">72</div>
+        <div class="overall-label">Overall Score</div>
+        <div class="overall-grade" id="rGrade">⚠ AVERAGE — Improvements needed</div>
+      </div>
+    </div>
+
+    <!-- Score cards -->
+    <div class="score-grid">
+      <div class="sc">
+        <div class="sc-top" id="sc-top-perf" style="background:#fbbf24"></div>
+        <div class="sc-ring">
+          <svg width="76" height="76" viewBox="0 0 76 76">
+            <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+            <circle id="ring-perf" cx="38" cy="38" r="30" fill="none" stroke="#fbbf24" stroke-width="7" stroke-dasharray="188.5" stroke-dashoffset="57" stroke-linecap="round"/>
+          </svg>
+          <div class="sc-ring-val c-amber" id="val-perf">70</div>
+        </div>
+        <div class="sc-name">Performance</div>
+        <div class="sc-sub" id="sub-perf">5.8s load time</div>
+      </div>
+      <div class="sc">
+        <div class="sc-top" id="sc-top-sec" style="background:#f87171"></div>
+        <div class="sc-ring">
+          <svg width="76" height="76" viewBox="0 0 76 76">
+            <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+            <circle id="ring-sec" cx="38" cy="38" r="30" fill="none" stroke="#f87171" stroke-width="7" stroke-dasharray="188.5" stroke-dashoffset="94" stroke-linecap="round"/>
+          </svg>
+          <div class="sc-ring-val c-red" id="val-sec">50</div>
+        </div>
+        <div class="sc-name">Security</div>
+        <div class="sc-sub" id="sub-sec">2 critical issues</div>
+      </div>
+      <div class="sc">
+        <div class="sc-top" id="sc-top-mob" style="background:#34d399"></div>
+        <div class="sc-ring">
+          <svg width="76" height="76" viewBox="0 0 76 76">
+            <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+            <circle id="ring-mob" cx="38" cy="38" r="30" fill="none" stroke="#34d399" stroke-width="7" stroke-dasharray="188.5" stroke-dashoffset="19" stroke-linecap="round"/>
+          </svg>
+          <div class="sc-ring-val c-green" id="val-mob">90</div>
+        </div>
+        <div class="sc-name">Mobile</div>
+        <div class="sc-sub" id="sub-mob">Well optimized</div>
+      </div>
+      <div class="sc">
+        <div class="sc-top" id="sc-top-code" style="background:var(--c1)"></div>
+        <div class="sc-ring">
+          <svg width="76" height="76" viewBox="0 0 76 76">
+            <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+            <circle id="ring-code" cx="38" cy="38" r="30" fill="none" stroke="#43c3e4" stroke-width="7" stroke-dasharray="188.5" stroke-dashoffset="38" stroke-linecap="round"/>
+          </svg>
+          <div class="sc-ring-val c-blue" id="val-code">80</div>
+        </div>
+        <div class="sc-name">Code Quality</div>
+        <div class="sc-sub" id="sub-code">3 CSS errors</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('issues',this)">⚠ Issues (3)</button>
+      <button class="tab" onclick="showTab('metrics',this)">📊 Metrics</button>
+      <button class="tab" onclick="showTab('security',this)">🔒 Security</button>
+      <button class="tab" onclick="showTab('seo',this)">🔍 SEO</button>
+      <button class="tab" onclick="showTab('packages',this)">💎 Packages</button>
+    </div>
+
+    <!-- TAB: Issues -->
+    <div class="sec active" id="sec-issues">
+      <div class="sec-label">Issues found — 3 total</div>
+      <div class="issues-list" id="issuesList">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- TAB: Metrics -->
+    <div class="sec" id="sec-metrics">
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Loading Speed</div>
+          <div class="mrow"><span class="mkey">Total time</span><div class="mbar-wrap"><div class="mbar" id="mbar-ttl" style="width:75%;background:#fbbf24"></div></div><span class="mval c-amber" id="mv-ttl">5.8s</span></div>
+          <div class="mrow"><span class="mkey">First Contentful Paint</span><div class="mbar-wrap"><div class="mbar" id="mbar-fcp" style="width:50%;background:#fbbf24"></div></div><span class="mval c-amber" id="mv-fcp">2.1s</span></div>
+          <div class="mrow"><span class="mkey">Largest Contentful Paint</span><div class="mbar-wrap"><div class="mbar" id="mbar-lcp" style="width:85%;background:#f87171"></div></div><span class="mval c-red" id="mv-lcp">4.6s</span></div>
+          <div class="mrow"><span class="mkey">Time to Interactive</span><div class="mbar-wrap"><div class="mbar" id="mbar-tti" style="width:90%;background:#f87171"></div></div><span class="mval c-red" id="mv-tti">7.2s</span></div>
+          <div class="mrow"><span class="mkey">Cumulative Layout Shift</span><div class="mbar-wrap"><div class="mbar" id="mbar-cls" style="width:15%;background:#34d399"></div></div><span class="mval c-green" id="mv-cls">0.04</span></div>
+          <div class="mrow"><span class="mkey">First Input Delay</span><div class="mbar-wrap"><div class="mbar" id="mbar-fid" style="width:20%;background:#34d399"></div></div><span class="mval c-green" id="mv-fid">18ms</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Resources &amp; Size</div>
+          <div class="mrow"><span class="mkey">Total size</span><span class="mval c-amber" id="mv-size">4.2 MB</span></div>
+          <div class="mrow"><span class="mkey">JavaScript</span><span class="mval" id="mv-js">890 KB</span></div>
+          <div class="mrow"><span class="mkey">CSS</span><span class="mval" id="mv-css">124 KB</span></div>
+          <div class="mrow"><span class="mkey">Images</span><span class="mval c-red" id="mv-img">3.8 MB</span></div>
+          <div class="mrow"><span class="mkey">Fonts</span><span class="mval" id="mv-fonts">210 KB</span></div>
+          <div class="mrow"><span class="mkey">HTTP requests</span><span class="mval c-amber" id="mv-req">87</span></div>
+          <div class="mrow"><span class="mkey">Cache configured</span><span class="mval c-red" id="mv-cache">No</span></div>
+          <div class="mrow"><span class="mkey">Gzip / Brotli</span><span class="mval c-amber" id="mv-gzip">Partial</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Security -->
+    <div class="sec" id="sec-security">
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Security Checklist</div>
+          <div class="citem"><div class="cico ico-err">✗</div>HTTPS / SSL active</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>Firewall configured</div>
+          <div class="citem"><div class="cico ico-err">✗</div>Content Security Policy (CSP)</div>
+          <div class="citem"><div class="cico ico-warn">!</div>X-Frame-Options header</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>CORS properly configured</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>SQL Injection protection active</div>
+          <div class="citem"><div class="cico ico-warn">!</div>Strict-Transport-Security</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>XSS Protection active</div>
+          <div class="citem"><div class="cico ico-err">✗</div>Permissions-Policy header</div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Server Information</div>
+          <div class="mrow"><span class="mkey">Domain</span><span class="mval" id="sv-domain">example.com</span></div>
+          <div class="mrow"><span class="mkey">IP Address</span><span class="mval">104.21.45.67</span></div>
+          <div class="mrow"><span class="mkey">Server</span><span class="mval">Apache/2.4.51</span></div>
+          <div class="mrow"><span class="mkey">Domain expires</span><span class="mval c-amber">89 days</span></div>
+          <div class="mrow"><span class="mkey">SSL Certificate</span><span class="mval c-red">Not found</span></div>
+          <div class="mrow"><span class="mkey">IPv6 Support</span><span class="mval c-red">Inactive</span></div>
+          <div class="mrow"><span class="mkey">Blacklist check</span><span class="mval c-green">Clean</span></div>
+          <div class="mrow"><span class="mkey">WHOIS Privacy</span><span class="mval c-green">Active</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SEO -->
+    <div class="sec" id="sec-seo">
+      <div class="seo-top">
+        <div class="seo-card"><div class="seo-val c-amber">68</div><div class="seo-key">SEO Score</div></div>
+        <div class="seo-card"><div class="seo-val c-green">1/1</div><div class="seo-key">H1 Tags</div></div>
+        <div class="seo-card"><div class="seo-val c-red">0/6</div><div class="seo-key">Meta Desc.</div></div>
+        <div class="seo-card"><div class="seo-val c-red">12</div><div class="seo-key">Img no-alt</div></div>
+        <div class="seo-card"><div class="seo-val c-green">87</div><div class="seo-key">Pages indexed</div></div>
+        <div class="seo-card"><div class="seo-val c-amber">24</div><div class="seo-key">Backlinks</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">SEO Checklist</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>Title tag present and unique</div>
+          <div class="citem"><div class="cico ico-err">✗</div>Meta description (6 pages missing)</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>Sitemap.xml active and valid</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>Robots.txt configured</div>
+          <div class="citem"><div class="cico ico-warn">!</div>Canonical URL (inconsistent)</div>
+          <div class="citem"><div class="cico ico-err">✗</div>Open Graph tags (social media)</div>
+          <div class="citem"><div class="cico ico-ok">✓</div>Structured data (schema.org)</div>
+          <div class="citem"><div class="cico ico-err">✗</div>Twitter Card meta tags</div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Search Performance</div>
+          <div class="mrow"><span class="mkey">Google position</span><span class="mval c-amber">#34</span></div>
+          <div class="mrow"><span class="mkey">Monthly clicks</span><span class="mval">~120</span></div>
+          <div class="mrow"><span class="mkey">Domain Authority</span><span class="mval c-amber">18/100</span></div>
+          <div class="mrow"><span class="mkey">Page Authority</span><span class="mval c-amber">22/100</span></div>
+          <div class="mrow"><span class="mkey">Duplicate content</span><span class="mval c-green">Not found</span></div>
+          <div class="mrow"><span class="mkey">Broken links</span><span class="mval c-amber">3 found</span></div>
+          <div class="mrow"><span class="mkey">Core Web Vitals</span><span class="mval c-red">Failing</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Packages -->
+    <div class="sec" id="sec-packages">
+      <div class="sec-label">Choose a package for your full report</div>
+      <div class="pkg-grid">
+        <div class="pkg">
+          <div class="pkg-name">Basic</div>
+          <div class="pkg-price">5–10 <span>€ / analysis</span></div>
+          <div class="pkg-target">Ideal for individuals and beginners with small websites</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Quick website analysis</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Speed test</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Basic error detection</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Quick improvement tips</div>
+          <div class="pkg-feat"><span class="no">–</span>PDF Report</div>
+          <div class="pkg-feat"><span class="no">–</span>Full security check</div>
+          <button class="pkg-btn" onclick="alert('Contact us to get started! →  contact.html')">Choose Basic</button>
+        </div>
+        <div class="pkg popular">
+          <div class="pop-badge">✦ MOST POPULAR</div>
+          <div class="pkg-name">Standard</div>
+          <div class="pkg-price">10–20 <span>€ / analysis</span></div>
+          <div class="pkg-target">For small businesses and freelancers</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Full analysis</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Complete security check</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Mobile optimization</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Code check + SEO</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Full PDF report</div>
+          <div class="pkg-feat"><span class="no">–</span>Email consultation</div>
+          <button class="pkg-btn" onclick="alert('Contact us to get started! →  contact.html')">Choose Standard</button>
+        </div>
+        <div class="pkg">
+          <div class="pkg-name">Premium</div>
+          <div class="pkg-price">25–50 <span>€ / analysis</span></div>
+          <div class="pkg-target">For businesses with higher requirements</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Everything from Standard</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Detailed code optimization</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Advanced security tips</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Email consultation</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Before/after comparison</div>
+          <div class="pkg-feat"><span class="ok">✓</span>Monthly monitoring</div>
+          <button class="pkg-btn" onclick="alert('Contact us to get started! →  contact.html')">Choose Premium</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report footer -->
+    <div class="report-foot">
+      <p id="reportFootText">Report generated by Guardify — guardify.app</p>
+      <div class="foot-btns">
+        <button class="fb fb-primary">↓ Download PDF</button>
+        <button class="fb fb-sec" onclick="startOver()">↺ New Analysis</button>
+        <button class="fb fb-sec">↗ Share Report</button>
+        <button class="fb fb-sec">✉ Send by Email</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div style="text-align:center">
+      <div class="section-label" style="justify-content:center">How it works</div>
+      <h2>Three Steps. <span class="accent">Ten Seconds.</span></h2>
+      <p style="color:var(--muted);margin-top:1rem;max-width:480px;margin-left:auto;margin-right:auto">Our automated process works non-stop to give you the insights you need.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-num">1</div>
+        <h3>Enter Your URL</h3>
+        <p>Type your website address in the search box. No registration, no installation, no credit card required.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">2</div>
+        <h3>Automatic Analysis</h3>
+        <p>Our system scans your site across 6 dimensions in seconds — performance, security, mobile, code, SEO, and accessibility.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">3</div>
+        <h3>Get Your Report</h3>
+        <p>A complete report with scores, prioritized issues and concrete steps to fix them — understandable even without technical knowledge.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">
+      <img src="Guardify_Logo.png" alt="Guardify Logo">
+      <span>Guard<em>ify</em></span>
+    </div>
+    <div class="footer-copy">© 2026 Guardify – All rights reserved</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="idea.html">The Idea</a>
+      <a href="goals.html">Goals</a>
+      <a href="team.html">Team</a>
+      <a href="analyzer.html">Analyzer</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </footer>
+
+<script>
+// ─── Free Trial Counter (uses localStorage — persists across sessions) ───────
+const MAX_FREE = 3;
+
+function getUsed() {
+  return parseInt(localStorage.getItem('gfy_uses') || '0', 10);
+}
+function incrementUsed() {
+  localStorage.setItem('gfy_uses', getUsed() + 1);
+}
+function updateTrialBadge() {
+  const used = getUsed();
+  const remaining = MAX_FREE - used;
+  const badge = document.getElementById('trialBadge');
+  const text  = document.getElementById('trialText');
+  // Update dots
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('td' + i);
+    dot.classList.toggle('used', i <= used);
+  }
+  if (remaining <= 0) {
+    text.textContent = 'No free analyses left — choose a package';
+    badge.classList.add('exhausted');
+  } else if (remaining === 1) {
+    text.textContent = '1 free analysis remaining';
+  } else {
+    text.textContent = remaining + ' free analyses remaining';
+  }
+}
+
+function showPaywall() {
+  document.getElementById('paywallOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closePaywall() {
+  document.getElementById('paywallOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+// Close on backdrop click
+document.getElementById('paywallOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePaywall();
+});
+
+// Init badge on load
+updateTrialBadge();
+
+
+const profiles = [
+  {
+    score:82, grade:'✅ GOOD — Minor improvements possible',
+    gradeColor:'#34d399',
+    perf:{score:85,color:'#34d399',offset:28,sub:'2.1s load time'},
+    sec:{score:75,color:'#fbbf24',offset:47,sub:'1 warning'},
+    mob:{score:95,color:'#34d399',offset:9,sub:'Fully responsive'},
+    code:{score:88,color:'#34d399',offset:23,sub:'1 minor error'},
+    issues:[
+      {sev:'warn',icon:'🟡',bg:'rgba(251,191,36,.1)',title:'Images not compressed (2 images)',color:'#fbbf24',badge:'badge-warn',label:'MEDIUM',
+       desc:'2 JPEG images with a combined size of 1.4 MB slow down your page by ~0.8s. Converting to WebP format can reduce size by up to 75% without loss of quality.',
+       fix:'→ Convert to WebP + add loading="lazy" attribute to img tags'},
+      {sev:'info',icon:'🔵',bg:'rgba(67,195,228,.08)',title:'Missing Open Graph tags',color:'var(--c1)',badge:'badge-info',label:'LOW',
+       desc:'Without Open Graph meta tags, when your site is shared on social media (Facebook, LinkedIn, WhatsApp), a random image and text will be shown instead of a custom preview. This significantly reduces click-through rates.',
+       fix:'→ Add og:title, og:description, og:image and og:url tags to each page'},
+      {sev:'info',icon:'🔵',bg:'rgba(67,195,228,.08)',title:'Twitter Card tags missing',color:'var(--c1)',badge:'badge-info',label:'LOW',
+       desc:'Twitter Card tags help control how your site appears in tweets. Without them, Twitter generates a generic preview which gets far fewer clicks.',
+       fix:'→ Add twitter:card, twitter:title and twitter:image meta tags'}
+    ]
+  },
+  {
+    score:47, grade:'🔴 CRITICAL — Immediate action needed',
+    gradeColor:'#f87171',
+    perf:{score:38,color:'#f87171',offset:117,sub:'9.2s load time'},
+    sec:{score:30,color:'#f87171',offset:132,sub:'4 critical issues'},
+    mob:{score:52,color:'#fbbf24',offset:91,sub:'Not mobile ready'},
+    code:{score:55,color:'#fbbf24',offset:85,sub:'12 HTML errors'},
+    issues:[
+      {sev:'crit',icon:'🔴',bg:'rgba(248,113,113,.12)',title:'No SSL / HTTPS certificate',color:'#f87171',badge:'badge-crit',label:'CRITICAL',
+       desc:'Your site transmits data without encryption. Visitors are exposed to man-in-the-middle attacks. Google ranks sites without SSL lower, and browsers flag them as "Not Secure" — which drives away 85% of visitors.',
+       fix:'→ Install free SSL: Cloudflare or Let\'s Encrypt — takes 5 minutes'},
+      {sev:'crit',icon:'🔴',bg:'rgba(248,113,113,.12)',title:'Site not mobile optimized',color:'#f87171',badge:'badge-crit',label:'CRITICAL',
+       desc:'60% of global web traffic comes from mobile devices. Your site has no responsive design, causing major display issues on phones and tablets. This also heavily penalizes your Google ranking.',
+       fix:'→ Add responsive CSS with @media queries and a mobile-first layout'},
+      {sev:'warn',icon:'🟡',bg:'rgba(251,191,36,.1)',title:'Page load time is 9.2 seconds',color:'#fbbf24',badge:'badge-warn',label:'HIGH',
+       desc:'9.2 seconds is far above the recommended maximum of 3 seconds. 53% of mobile visitors leave if a page takes longer than 3s to load (Google, 2024). Unoptimized images and render-blocking scripts are the main causes.',
+       fix:'→ Compress images, enable browser caching, and defer non-critical JavaScript'}
+    ]
+  },
+  {
+    score:72, grade:'⚠ AVERAGE — Improvements needed',
+    gradeColor:'#fbbf24',
+    perf:{score:70,color:'#fbbf24',offset:57,sub:'5.8s load time'},
+    sec:{score:50,color:'#f87171',offset:94,sub:'2 critical issues'},
+    mob:{score:90,color:'#34d399',offset:19,sub:'Well optimized'},
+    code:{score:80,color:'var(--c1)',offset:38,sub:'3 CSS errors'},
+    issues:[
+      {sev:'crit',icon:'🔴',bg:'rgba(248,113,113,.12)',title:'Missing SSL Certificate / HTTPS',color:'#f87171',badge:'badge-crit',label:'CRITICAL',
+       desc:'Your site transmits data without encryption. Visitors are exposed to man-in-the-middle attacks. Google ranks sites without SSL lower and browsers mark them as "Not Secure" in red — driving away 85% of visitors.',
+       fix:'→ Install free SSL: Cloudflare or Let\'s Encrypt — 5 minutes'},
+      {sev:'warn',icon:'🟡',bg:'rgba(251,191,36,.1)',title:'Images not optimized (4 images)',color:'#fbbf24',badge:'badge-warn',label:'MEDIUM',
+       desc:'4 JPEG images totaling 3.8 MB slow your page by ~2.3 seconds. Current speed is 5.8s — recommended is under 3s. 53% of mobile visitors leave if the page doesn\'t load within 3 seconds (Google, 2024).',
+       fix:'→ Convert to WebP + add loading="lazy" to img tags'},
+      {sev:'info',icon:'🔵',bg:'rgba(67,195,228,.08)',title:'Meta description missing on 6 pages',color:'var(--c1)',badge:'badge-info',label:'LOW',
+       desc:'Without a meta description, Google auto-generates random text from the page — often unappealing. This reduces click-through rates by up to 30% in search results and directly impacts organic traffic.',
+       fix:'→ Add a unique 150-160 character meta description to each page'}
+    ]
+  }
+];
+
+const steps = [
+  {label:'🔗 Connecting to server...',fills:['pf1']},
+  {label:'⚡ Measuring performance metrics...',fills:['pf2']},
+  {label:'🔒 Scanning security headers...',fills:['pf3']},
+  {label:'📱 Testing mobile responsiveness...',fills:['pf4']},
+  {label:'💻 Analyzing code quality...',fills:['pf5']},
+  {label:'🔍 Checking SEO signals...',fills:['pf6']}
+];
+
+function startAnalysis() {
+  // Check free trial
+  if (getUsed() >= MAX_FREE) {
+    showPaywall();
+    return;
+  }
+
+  const raw = document.getElementById('urlInput').value.trim() || 'https://yourwebsite.com';
+  let url = raw;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+  // Pick a profile based on URL characteristics (for demo)
+  let profile;
+  if (url.includes('google') || url.includes('guardian') || url.includes('bbc')) profile = profiles[0];
+  else if (url.length < 22 || url.includes('.al') || url.includes('test')) profile = profiles[2];
+  else profile = profiles[Math.floor(Math.random() * profiles.length)];
+
+  // Update favicon letter
+  const letter = url.replace('https://','').replace('http://','')[0]?.toUpperCase() || 'G';
+  document.getElementById('rFavicon').textContent = letter;
+  document.getElementById('rUrl').textContent = url;
+  document.getElementById('sv-domain').textContent = url.replace('https://','').replace('http://','').split('/')[0];
+
+  const now = new Date();
+  document.getElementById('rDate').textContent =
+    'Analysis completed — ' + now.getDate() + ' May 2026, ' +
+    now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+
+  const pw = document.getElementById('progressWrap');
+  const results = document.getElementById('results');
+  results.style.display = 'none';
+  pw.style.display = 'block';
+  ['pf1','pf2','pf3','pf4','pf5','pf6'].forEach(id => document.getElementById(id).style.width = '0');
+
+  let i = 0;
+  function next() {
+    if (i >= steps.length) {
+      setTimeout(() => {
+        pw.style.display = 'none';
+        incrementUsed();
+        updateTrialBadge();
+        applyProfile(profile);
+        results.style.display = 'block';
+        results.scrollIntoView({behavior:'smooth', block:'start'});
+        showTab('issues', document.querySelector('.tab'));
+      }, 400);
+      return;
+    }
+    steps[i].fills.forEach(f => document.getElementById(f).style.width = '100%');
+    document.getElementById('pLabel').textContent = steps[i].label;
+    i++;
+    setTimeout(next, 540);
+  }
+  next();
+}
+
+function applyProfile(p) {
+  // Overall
+  document.getElementById('rScore').textContent = p.score;
+  document.getElementById('rGrade').textContent = p.grade;
+  document.getElementById('rGrade').style.color = p.gradeColor;
+
+  // Cards
+  function applyCard(key, data) {
+    document.getElementById('sc-top-'+key).style.background = data.color;
+    document.getElementById('ring-'+key).style.stroke = data.color;
+    document.getElementById('ring-'+key).setAttribute('stroke-dashoffset', data.offset);
+    document.getElementById('val-'+key).textContent = data.score;
+    document.getElementById('val-'+key).style.color = data.color;
+    document.getElementById('sub-'+key).textContent = data.sub;
+  }
+  applyCard('perf',p.perf); applyCard('sec',p.sec);
+  applyCard('mob',p.mob); applyCard('code',p.code);
+
+  // Issues
+  const list = document.getElementById('issuesList');
+  list.innerHTML = '';
+  document.querySelector('.tab').textContent = '⚠ Issues (' + p.issues.length + ')';
+  p.issues.forEach(iss => {
+    list.innerHTML += `
+      <div class="issue">
+        <div class="issue-sev-icon" style="background:${iss.bg}">${iss.icon}</div>
+        <div style="flex:1">
+          <div class="issue-title" style="color:${iss.color}">${iss.title}</div>
+          <div class="issue-desc">${iss.desc}</div>
+          <div class="issue-fix">${iss.fix}</div>
+        </div>
+        <div class="badge ${iss.badge}">${iss.label}</div>
+      </div>`;
+  });
+
+  // Report footer date
+  const now = new Date();
+  document.getElementById('reportFootText').textContent =
+    'Report generated by Guardify — guardify.app — ' + now.getDate() + ' May 2026';
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function startOver() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('urlInput').value = '';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Allow Enter key to trigger scan
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startAnalysis();
+});
+
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+function animRing(){ rx+=(mx-rx)*.15; ry+=(my-ry)*.15; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); }
+animRing();
+
+// Reveal animations
+const obs = new IntersectionObserver(entries => entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'), i*80); }), {threshold:.1});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => { hamburger.classList.toggle('open'); mobileMenu.classList.toggle('open'); });
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { hamburger.classList.remove('open'); mobileMenu.classList.remove('open'); }));
+</script>
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardify – Packages & Pricing</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+  /* ── PAGE HERO ── */
+  .pkg-page-hero {
+    min-height: 42vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 9rem 2rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .pkg-page-hero h1 { animation: fadeUp .8s ease both; }
+  .pkg-page-hero p { color:var(--muted); margin-top:1rem; font-size:1.05rem; max-width:500px; animation:fadeUp .8s .1s ease both; }
+
+  /* ── PRICING TOGGLE ── */
+  .toggle-wrap {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1rem; margin: 2rem 0 3.5rem;
+    font-size: .85rem; color: var(--muted);
+    animation: fadeUp .8s .15s ease both;
+  }
+  .toggle-track {
+    width: 52px; height: 28px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 100px;
+    position: relative; cursor: pointer; transition: background .3s;
+  }
+  .toggle-track.on { background: linear-gradient(135deg,var(--c4),var(--c3)); border-color:transparent; }
+  .toggle-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; transition: left .3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  .toggle-track.on .toggle-thumb { left: 27px; }
+  .save-badge {
+    background: rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.3);
+    color:#34d399; font-size:.68rem; font-weight:700; padding:.2rem .6rem;
+    border-radius:6px; letter-spacing:.06em; text-transform:uppercase;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  /* ── MAIN PACKAGES ── */
+  .packages-section { padding: 0 5rem 5rem; }
+  .pkg-grid-main { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+
+  .pkg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 2.5rem 2rem;
+    position: relative; overflow: hidden;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+    display: flex; flex-direction: column;
+  }
+  .pkg-card::before {
+    content: ''; position: absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--c4), var(--c1));
+    opacity: 0; transition: opacity .3s;
+  }
+  .pkg-card:hover { transform: translateY(-6px); border-color:rgba(67,195,228,.35); box-shadow:0 20px 50px rgba(0,0,0,.3); }
+  .pkg-card:hover::before { opacity: 1; }
+  .pkg-card.featured {
+    border-color: rgba(67,195,228,.45);
+    background: rgba(67,195,228,.04);
+    box-shadow: 0 0 40px rgba(67,195,228,.1);
+  }
+  .pkg-card.featured::before { opacity: 1; }
+  .featured-badge {
+    display: inline-block; background: linear-gradient(135deg,var(--c4),var(--c3));
+    color: #fff; font-size: .65rem; font-weight: 800;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: .3rem 1rem; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 1.2rem; align-self: flex-start;
+  }
+  .pkg-card-name { font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:900; margin-bottom:.6rem; }
+  .pkg-card-desc { font-size:.82rem; color:var(--muted); margin-bottom:1.8rem; line-height:1.6; }
+  .pkg-card-price {
+    font-family:'Outfit',sans-serif; font-size:2.8rem; font-weight:900;
+    color:var(--c1); line-height:1; margin-bottom:.4rem;
+  }
+  .pkg-card-price .currency { font-size:1.5rem; vertical-align:super; margin-right:.2rem; }
+  .pkg-card-price .period { font-size:.9rem; color:var(--muted); font-weight:400; }
+  .pkg-card-price .range { font-size:1.6rem; }
+  .pkg-card-billing { font-size:.75rem; color:var(--muted); margin-bottom:2rem; font-family:'JetBrains Mono',monospace; }
+  .pkg-divider { height:1px; background:var(--border); margin:1.5rem 0; }
+  .pkg-features-label { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-family:'JetBrains Mono',monospace; margin-bottom:.8rem; }
+  .pkg-feature {
+    display: flex; align-items: flex-start; gap: .8rem;
+    font-size: .83rem; color: var(--muted); padding: .4rem 0;
+    line-height: 1.5;
+  }
+  .pkg-feature .fok { color:#34d399; font-weight:700; flex-shrink:0; margin-top:.05rem; }
+  .pkg-feature .fno { color:rgba(122,154,181,.35); flex-shrink:0; margin-top:.05rem; }
+  .pkg-feature.highlight { color:var(--text); }
+  .pkg-cta {
+    margin-top: auto; padding-top: 2rem;
+  }
+  .pkg-cta-btn {
+    width: 100%; padding: 1.1rem;
+    background: linear-gradient(135deg,var(--c4),var(--c3));
+    border: none; border-radius: 12px; color:#fff;
+    font-size: .95rem; font-weight: 700;
+    font-family: 'Outfit',sans-serif; cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 4px 20px rgba(67,195,228,.2);
+    text-decoration: none; display: block; text-align: center;
+  }
+  .pkg-cta-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(67,195,228,.4); }
+  .pkg-cta-btn.outline {
+    background: transparent;
+    border: 1px solid rgba(67,195,228,.3);
+    color: var(--text);
+    box-shadow: none;
+  }
+  .pkg-cta-btn.outline:hover { background:rgba(67,195,228,.06); border-color:rgba(67,195,228,.5); box-shadow:none; }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-section { padding: 4rem 5rem 6rem; border-top:1px solid var(--border); }
+  .compare-table { width:100%; border-collapse:collapse; margin-top:2.5rem; }
+  .compare-table th {
+    padding: 1rem 1.5rem; text-align:left;
+    font-size:.8rem; font-family:'JetBrains Mono',monospace;
+    text-transform:uppercase; letter-spacing:.1em; color:var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table th.pkg-col { text-align:center; color:var(--text); font-size:.85rem; }
+  .compare-table td {
+    padding: .9rem 1.5rem; font-size:.84rem;
+    border-bottom: 1px solid rgba(67,195,228,.05);
+    color: var(--muted);
+  }
+  .compare-table td.pkg-col { text-align:center; }
+  .compare-table tr:hover td { background:rgba(67,195,228,.03); }
+  .compare-table tr:last-child td { border-bottom:none; }
+  .check-yes { color:#34d399; font-size:1rem; }
+  .check-no { color:rgba(122,154,181,.3); font-size:1rem; }
+  .check-partial { color:#fbbf24; font-size:.8rem; font-family:'JetBrains Mono',monospace; }
+  .feature-name { color:var(--text); font-weight:500; }
+  .feature-cat {
+    background: rgba(67,195,228,.04);
+    color: var(--c1); font-size:.72rem;
+    font-family:'JetBrains Mono',monospace;
+    text-transform:uppercase; letter-spacing:.1em;
+    font-weight:700;
+  }
+  .feature-cat td { padding:.6rem 1.5rem; border-bottom:1px solid var(--border); }
+
+  /* ── FAQ ── */
+  .faq-section { padding: 0 5rem 6rem; }
+  .faq-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:2.5rem; }
+  .faq-item {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:1.5rem; cursor:pointer;
+    transition:border-color .2s;
+  }
+  .faq-item:hover { border-color:rgba(67,195,228,.3); }
+  .faq-q { font-weight:700; font-size:.9rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+  .faq-arrow { color:var(--c1); transition:transform .3s; flex-shrink:0; }
+  .faq-item.open .faq-arrow { transform:rotate(180deg); }
+  .faq-a { font-size:.83rem; color:var(--muted); margin-top:.8rem; line-height:1.7; display:none; }
+  .faq-item.open .faq-a { display:block; animation:fadeUp .3s ease both; }
+
+  /* ── CTA BANNER ── */
+  .cta-banner {
+    margin: 0 5rem 6rem;
+    background: linear-gradient(135deg,rgba(67,195,228,.08),rgba(66,147,208,.06));
+    border:1px solid rgba(67,195,228,.2);
+    border-radius:20px; padding:4rem 3rem;
+    text-align:center; position:relative; overflow:hidden;
+  }
+  .cta-banner h2 { font-family:'Outfit',sans-serif; font-size:clamp(1.6rem,3vw,2.4rem); font-weight:900; letter-spacing:-.03em; margin-bottom:.8rem; }
+  .cta-banner p { color:var(--muted); max-width:480px; margin:0 auto 2rem; }
+  .cta-actions { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+
+  /* Responsive */
+  @media(max-width:1000px){
+    .packages-section, .compare-section, .faq-section, .cta-banner { padding-left:2rem; padding-right:2rem; }
+    .pkg-grid-main { grid-template-columns:1fr; max-width:480px; margin:0 auto; }
+    .compare-section { overflow-x:auto; }
+    .faq-grid { grid-template-columns:1fr; }
+    .cta-banner { margin:0 2rem 4rem; }
+  }
+  @media(max-width:600px){
+    .pkg-page-hero { padding:8rem 1.5rem 3rem; }
+  }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="Guardify_Logo.png" alt="Guardify Logo">
+      <span>Guard<em>ify</em></span>
+    </a>
+    <ul>
+      <li><a href="index.html" >Home</a></li>
+      <li><a href="idea.html" >The Idea</a></li>
+      <li><a href="goals.html" >Goals &amp; Mission</a></li>
+      <li><a href="team.html" >Team</a></li>
+      <li><a href="analyzer.html" >Analyzer</a></li>
+      <li><a href="packages.html" class="active">Packages</a></li>
+      <li><a href="contact.html" >Contact</a></li>
+    </ul>
+    <a href="analyzer.html" class="nav-cta">Try It Free</a>
+    <button class="hamburger" id="hamburger" aria-label="Open Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="idea.html">The Idea</a>
+    <a href="goals.html">Goals &amp; Mission</a>
+    <a href="team.html">Team</a>
+    <a href="analyzer.html">Analyzer</a>
+    <a href="packages.html" class="active">Packages</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="pkg-page-hero">
+    <div class="hero-grid"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="section-label" style="justify-content:center; animation:fadeUp .7s ease both;">Simple, transparent pricing</div>
+    <h1>Choose Your <span class="accent">Package</span></h1>
+    <p>Start free — 3 analyses on us. When you're ready to go further, pick a plan that fits your needs.</p>
+    <!-- Toggle: per-analysis vs bundle -->
+    <div class="toggle-wrap">
+      <span>Per Analysis</span>
+      <div class="toggle-track" id="billingToggle" onclick="toggleBilling()">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span>Bundle (5×)</span>
+      <span class="save-badge">Save 20%</span>
+    </div>
+  </section>
+
+  <!-- PACKAGES -->
+  <div class="packages-section">
+    <div class="pkg-grid-main">
+
+      <!-- BASIC -->
+      <div class="pkg-card reveal">
+        <div class="pkg-card-name">Basic</div>
+        <div class="pkg-card-desc">Perfect for individuals, students, and anyone launching their first website.</div>
+        <div class="pkg-card-price">
+          <span class="currency">€</span><span class="range" id="price-basic">5–10</span>
+        </div>
+        <div class="pkg-card-billing" id="billing-basic">per single analysis</div>
+        <div class="pkg-divider"></div>
+        <div class="pkg-features-label">What's included</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Website performance analysis</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Speed test (load time)</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Basic error detection</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Quick improvement tips</div>
+        <div class="pkg-feature"><span class="fno">–</span>PDF report download</div>
+        <div class="pkg-feature"><span class="fno">–</span>Full security check</div>
+        <div class="pkg-feature"><span class="fno">–</span>Mobile optimization check</div>
+        <div class="pkg-feature"><span class="fno">–</span>Email consultation</div>
+        <div class="pkg-cta">
+          <a href="contact.html" class="pkg-cta-btn outline">Get Basic →</a>
+        </div>
+      </div>
+
+      <!-- STANDARD (featured) -->
+      <div class="pkg-card featured reveal">
+        <div class="featured-badge">✦ Most Popular</div>
+        <div class="pkg-card-name">Standard</div>
+        <div class="pkg-card-desc">Everything you need to seriously improve your site — used by small businesses and freelancers.</div>
+        <div class="pkg-card-price">
+          <span class="currency">€</span><span class="range" id="price-standard">10–20</span>
+        </div>
+        <div class="pkg-card-billing" id="billing-standard">per single analysis</div>
+        <div class="pkg-divider"></div>
+        <div class="pkg-features-label">What's included</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Full website analysis</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Complete security check</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Mobile optimization check</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Code quality + SEO audit</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Full PDF report download</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Prioritized issue list</div>
+        <div class="pkg-feature"><span class="fno">–</span>Email consultation</div>
+        <div class="pkg-feature"><span class="fno">–</span>Before/after comparison</div>
+        <div class="pkg-cta">
+          <a href="contact.html" class="pkg-cta-btn">Get Standard →</a>
+        </div>
+      </div>
+
+      <!-- PREMIUM -->
+      <div class="pkg-card reveal">
+        <div class="pkg-card-name">Premium</div>
+        <div class="pkg-card-desc">For businesses that need deep insights, expert guidance, and ongoing monitoring.</div>
+        <div class="pkg-card-price">
+          <span class="currency">€</span><span class="range" id="price-premium">25–50</span>
+        </div>
+        <div class="pkg-card-billing" id="billing-premium">per single analysis</div>
+        <div class="pkg-divider"></div>
+        <div class="pkg-features-label">What's included</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Everything in Standard</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Detailed code optimization</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Advanced security tips</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Email consultation included</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Before/after comparison</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Monthly monitoring</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Priority response</div>
+        <div class="pkg-feature highlight"><span class="fok">✓</span>Custom report branding</div>
+        <div class="pkg-cta">
+          <a href="contact.html" class="pkg-cta-btn outline">Get Premium →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <section class="compare-section reveal">
+    <div style="text-align:center">
+      <div class="section-label" style="justify-content:center">Full feature comparison</div>
+      <h2>What's in <span class="accent">Each Package</span></h2>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="width:40%">Feature</th>
+          <th class="pkg-col">Basic</th>
+          <th class="pkg-col" style="color:var(--c1)">Standard ✦</th>
+          <th class="pkg-col">Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="feature-cat"><td colspan="4">Performance</td></tr>
+        <tr><td class="feature-name">Speed analysis (load time)</td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Core Web Vitals (FCP, LCP, CLS)</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Resource size breakdown</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Performance optimization tips</td><td class="pkg-col"><span class="check-partial">Basic</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr class="feature-cat"><td colspan="4">Security</td></tr>
+        <tr><td class="feature-name">SSL / HTTPS check</td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Security headers (CSP, HSTS…)</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Vulnerability detection</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Advanced security advisory</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr class="feature-cat"><td colspan="4">Code & SEO</td></tr>
+        <tr><td class="feature-name">HTML/CSS error detection</td><td class="pkg-col"><span class="check-partial">Basic</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">SEO audit (meta, sitemap, OG)</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Mobile responsiveness check</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Detailed code optimization</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr class="feature-cat"><td colspan="4">Reporting & Support</td></tr>
+        <tr><td class="feature-name">In-browser results</td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Full PDF report download</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Before / after comparison</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Email consultation</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+        <tr><td class="feature-name">Monthly monitoring</td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-no">–</span></td><td class="pkg-col"><span class="check-yes">✓</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div style="text-align:center">
+      <div class="section-label" style="justify-content:center">Frequently asked</div>
+      <h2>Common <span class="accent">Questions</span></h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item reveal" onclick="toggleFaq(this)">
+        <div class="faq-q">How do the 3 free analyses work? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Every visitor gets 3 completely free analyses — no registration, no credit card needed. After that, you'll need to choose a package to continue. The counter is stored in your browser and never resets.</div>
+      </div>
+      <div class="faq-item reveal" onclick="toggleFaq(this)">
+        <div class="faq-q">How do I pay after my free analyses? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Contact us via the contact page or email us at guardifyapp2025@gmail.com to choose your package. We'll set you up and provide access within 24 hours.</div>
+      </div>
+      <div class="faq-item reveal" onclick="toggleFaq(this)">
+        <div class="faq-q">Can I analyze any website, including my competitor's? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Yes — Guardify can analyze any publicly accessible website URL. This is great for benchmarking your site against competitors and seeing where you stand.</div>
+      </div>
+      <div class="faq-item reveal" onclick="toggleFaq(this)">
+        <div class="faq-q">Is the Basic package good for beginners? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Absolutely. The Basic package is designed to be simple and understandable — no technical knowledge needed. You'll get clear, actionable tips you can implement right away.</div>
+      </div>
+      <div class="faq-item reveal" onclick="toggleFaq(this)">
+        <div class="faq-q">What does the PDF report include? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">The PDF report (Standard and Premium) contains all findings, scores, prioritized issues with severity levels, step-by-step fix instructions, and performance metrics — professionally formatted and ready to share with your team or client.</div>
+      </div>
+      <div class="faq-item reveal" onclick="toggleFaq(this)">
+        <div class="faq-q">What is the email consultation in the Premium plan? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">After your analysis, our team will review the results and send you a short personalized email with expert advice tailored to your specific situation — going beyond the automated report.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <div class="cta-banner reveal">
+    <h2>Start Analyzing — <span class="accent">It's Free</span></h2>
+    <p>Your first 3 analyses are on us. No registration, no credit card, no strings attached.</p>
+    <div class="cta-actions">
+      <a href="analyzer.html" class="btn-main">Try the Analyzer →</a>
+      <a href="contact.html" class="btn-ghost">Get in Touch</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">
+      <img src="Guardify_Logo.png" alt="Guardify Logo">
+      <span>Guard<em>ify</em></span>
+    </div>
+    <div class="footer-copy">© 2026 Guardify – All rights reserved</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="idea.html">The Idea</a>
+      <a href="analyzer.html">Analyzer</a>
+      <a href="packages.html">Packages</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </footer>
+
+<script>
+// ── Pricing toggle (per-analysis vs bundle 5×) ──────────────────
+let isBundleMode = false;
+const prices = {
+  basic:    { single:'5–10',    bundle:'20–40' },
+  standard: { single:'10–20',   bundle:'40–80' },
+  premium:  { single:'25–50',   bundle:'100–200' }
+};
+const billings = {
+  single: 'per single analysis',
+  bundle: 'for a bundle of 5 analyses (save 20%)'
+};
+
+function toggleBilling() {
+  isBundleMode = !isBundleMode;
+  const track = document.getElementById('billingToggle');
+  track.classList.toggle('on', isBundleMode);
+  const mode = isBundleMode ? 'bundle' : 'single';
+  ['basic','standard','premium'].forEach(key => {
+    document.getElementById('price-'+key).textContent = prices[key][mode];
+    document.getElementById('billing-'+key).textContent = billings[mode];
+  });
+}
+
+// ── FAQ accordion ──────────────────────────────────────────────
+function toggleFaq(el) {
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+// ── Custom cursor ──────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+function animRing(){ rx+=(mx-rx)*.15; ry+=(my-ry)*.15; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); }
+animRing();
+
+// ── Reveal animations ──────────────────────────────────────────
+const obs = new IntersectionObserver(entries => entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'), i*80); }), {threshold:.1});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── Hamburger ──────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => { hamburger.classList.toggle('open'); mobileMenu.classList.toggle('open'); });
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { hamburger.classList.remove('open'); mobileMenu.classList.remove('open'); }));
+</script>
+</body>
+</html>
